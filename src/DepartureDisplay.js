@@ -1,5 +1,6 @@
 import React, { PureComponent } from 'react';
 import Papa from 'papaparse';
+import DepartureState from './DepartureState';
 import './DepartureDisplay.css';
 
 
@@ -11,6 +12,36 @@ class DepartureDisplay extends PureComponent {
       data: null,
       sortBy: null, // rowIdx
       descending: false,
+    }
+
+    this.POLL_INTERVAL = 1000;  // milliseconds
+
+    // Start polling at (approximately) set intervals.
+    this.pollDisplatData();
+    setInterval(() => this.pollDisplayData(), this.POLL_INTERVAL);
+  }
+
+  pollDisplayData() {
+    Papa.parse("http://developer.mbta.com/lib/gtrtfs/Departures.csv", {
+      delimiter: ",",
+      header: true,
+      dynamicTyping: true,
+      download: true,
+    	complete: results => {
+        var newState = this.convertCsvToState(results);
+    		this.setState(newState);
+    	}
+    });
+  }
+
+  convertCsvToState(results) {
+    if (results.errors) {
+      results.errors.forEach(error => console.error(error));
+    }
+    if (results.data) {
+      return new DepartureState(results.data);
+    } else {
+      return null;
     }
   }
 
@@ -67,20 +98,6 @@ class DepartureDisplay extends PureComponent {
         }</tbody>
       </table>
     )
-  }
-
-  _sortToggle(column) {
-    let newState = null;
-    if (this.state.sortBy === column) {
-      newState = {descending: !this.state.descending}
-    } else {
-      newState = {sortBy: column, descending: false}
-    }
-    let order = newState.descending ? -1 : 1;
-    let newData = Array.from(this.state.data)
-    newData.sort((a, b) => a[column] > b[column] ? order : -order)
-    newState.data = newData
-    this.setState(newState)
   }
 
 }
