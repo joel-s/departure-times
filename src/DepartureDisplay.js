@@ -18,7 +18,7 @@ class DepartureDisplay extends PureComponent {
   }
 
   pollDisplayData() {
-    Papa.parse("sample-departures.csv", {
+    Papa.parse(this.getCsvUrl(), {
       delimiter: ",",
       header: true,
       download: true,
