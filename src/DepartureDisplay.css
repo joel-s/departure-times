@@ -5,8 +5,9 @@
   color: black;
 }
 
-.DepartureDisplay input {
-  font: 16px Arial;
+.DepartureDisplay h3 {
+  text-align: center;
+  color: #ee6611;
 }
 
 .DepartureDisplay td {

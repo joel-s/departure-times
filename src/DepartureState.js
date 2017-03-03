@@ -1,20 +1,35 @@
 import React from 'react';
 
+/**
+ * Immutable object used to save and format departure state information.
+ */
 class DepartureState {
 
   constructor(data) {
-    this.headers = ["Origin", "Time", "Destination", "Train#", "Track#", "Status"];
-    this.data = data;
+    this.headers = ["Time", "Destination", "Train#", "Track#", "Status"];
+    this.northData = data.filter(item => item.Origin === "North Station");
+    this.southData = data.filter(item => item.Origin === "South Station");
   }
 
-  renderTable() {
+  render() {
+    return (
+      <div>
+        <h3>North Station</h3>
+        {this._renderTable(this.northData)}
+        <h3>South Station</h3>
+        {this._renderTable(this.southData)}
+      </div>
+    );
+  }
+
+  _renderTable(data) {
     return (
       <table>
         <thead>
           {this._renderHeaderRow()}
         </thead>
         <tbody>
-          {this.data.map((row) => this._renderRow(row))}
+          {data.map((row) => this._renderRow(row))}
         </tbody>
       </table>
     )
@@ -30,8 +45,7 @@ class DepartureState {
 
   _renderRow(row) {
     return (
-      <tr key={this._getRowKey(row)}>
-        <td key="Origin">{row.Origin}</td>
+      <tr key={row.Trip}>
         <td key="Time" className="time">
           {this._formatTime(row.ScheduledTime)}
         </td>
@@ -43,15 +57,10 @@ class DepartureState {
     );
   }
 
-  _getRowKey(row) {
-    return row.Destination + row.ScheduledTime;
-  }
-
   _formatTime(time) {
-    var t = (+time) * 1000;  // convert to milliseconds
-    var d = new Date(t);
+    var d = new Date(time * 1000);  // convert to milliseconds
     var s = d.toLocaleTimeString();
-    var splitArray = s.split(":00 ");
+    var splitArray = s.split(":00 ");  // get rid of seconds
     return splitArray[0] + " " + splitArray[1];
   }
 };

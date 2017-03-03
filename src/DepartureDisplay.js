@@ -3,21 +3,35 @@ import Papa from 'papaparse';
 import DepartureState from './DepartureState';
 import './DepartureDisplay.css';
 
-
+/**
+ * A React component that displays departure information.
+ *
+ * This class is fairly simple: it attempts to download the departures CSV file
+ * using papaparse (from http://papaparse.com/). It keeps downloading new CSV
+ * data every POLL_INTERVAL milliseconds. (It downloads the data via a
+ * super-simple PHP proxy script to prevent cross-origin request errors.) On
+ * each successful download, it uses the CSV data to create a new immutable
+ * DepartureState object, and calls setState to trigger updating of the UI.
+ *
+ * See DepartureState for the complete rendering code.
+ */
 class DepartureDisplay extends PureComponent {
 
   constructor(props) {
     super(props)
-    this.state = {dstate: null};  // null or DepartureState object
+    this.state = {
+      dstate: null  // null or DepartureState object
+    };
 
     this.POLL_INTERVAL = 10 * 1000;  // 10 seconds
 
     // Start polling at (approximately) set intervals.
-    this.pollDisplayData();
-    setInterval(() => this.pollDisplayData(), this.POLL_INTERVAL);
+    this.pollDepartureData();
+    setInterval(() => this.pollDepartureData(), this.POLL_INTERVAL);
   }
 
-  pollDisplayData() {
+  /** Attempt to download departure data */
+  pollDepartureData() {
     Papa.parse(this.getCsvUrl(), {
       delimiter: ",",
       header: true,
@@ -56,16 +70,16 @@ class DepartureDisplay extends PureComponent {
   render() {
     return (
       <div className="DepartureDisplay">
-        {this._renderTable()}
+        {this._renderData()}
       </div>
     )
   }
 
-  _renderTable() {
+  _renderData() {
     if (this.state.dstate === null) {
       return <div className="loading">Waiting for response...</div>
     } else {
-      return this.state.dstate.renderTable();
+      return this.state.dstate.render();
     }
   }
 
